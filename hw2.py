@@ -60,7 +60,7 @@ def ExhaustiveSearch():
             print(shortest_distance, path)
             DrawTour(path)
         # 10분이 지나면 종료
-        if time.time() < end_time : break 
+        if time.time() > end_time : break
         
 
     print("탐색 끝")
@@ -110,7 +110,7 @@ def SimulatedAnnealing():
     # 초기해
     current = list(range(1, city_count))
 
-    while temperature >= 0.00001 and time.time() < end_time:
+    while time.time() < end_time:
         # 랜덤한 이웃해 생성
         exchange_idx1 = random.randint(0, city_count - 2)
         exchange_idx2 = random.randint(0, city_count - 2)
@@ -124,20 +124,19 @@ def SimulatedAnnealing():
 
 
         # 랜덤하게 찾은 이웃해가 더 좋은 해라면 current 업데이트
-        if (current_dist >= neighbor_dist):
+        if current_dist > neighbor_dist:
             current = neighbor
             print(neighbor_dist, neighbor)
             DrawTour(current)
         #simulated annealing은 이웃해가 좋지 않아도 확률적으로 이동이 가능
-        else:
-            probablity = math.exp((neighbor_dist - current_dist) / temperature)
+        elif current_dist < neighbor_dist:
+            probablity = math.exp((current_dist - neighbor_dist)/ temperature)
             if random.random() < probablity:
                 current = neighbor
                 print(neighbor_dist, neighbor)
                 DrawTour(current)
         # Scheduled(T) 작업 수행
         temperature *= 0.999
-        temperature -= 0.01
 
     print("탐색 끝")
     print(f"탐색시간 : {(time.time() - start_time)}초")
