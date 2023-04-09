@@ -6,15 +6,6 @@ import threading
 import random
 
 
-
-# 지정시간이 지나면 프로그램을 종료하는 함수
-def timeout():
-    print("10분이 지나 프로그램이 종료됩니다.")
-    # 프로그램 종료
-    import os
-    os._exit(0)
-
-
 # 도시 좌표 데이터 만들기
 #city_count = data[0]
 city_count = data[0]
@@ -22,6 +13,8 @@ city_coords = []
 for i in range(1, len(data), 3):
     city_coords.append((data[i + 1], data[i + 2], data[i]))
 
+#600초의 시간제한이 있다.
+time_limit = 600
 
 # 두 도시 좌표 사이의 거리 구하기
 import math
@@ -50,13 +43,11 @@ import itertools
 import time
 
 def ExhaustiveSearch():
-    # 600초가 지나면 프로그램이 종료되도록 함.
-    timer = threading.Timer(600, timeout)
-    timer.start()
 
     shortest_distance = math.inf
     shortest_path = None
     start_time = time.time()
+    end_time = start_time + time_limit
 
     # 1~ city_count 까지 존재하는 모든 순열의 리스트가 iter, 이 순열이 경로가 됨.
     iter = itertools.permutations(range(1, city_count))
@@ -68,23 +59,23 @@ def ExhaustiveSearch():
             shortest_path = path
             print(shortest_distance, path)
             DrawTour(path)
+        # 10분이 지나면 종료
+        if time.time() < end_time : break 
+        
 
     print("탐색 끝")
     print(f"탐색시간 : {(time.time() - start_time)}초")
-    timer.cancel()
     label.configure(text = shortest_distance)
 
 def FirstChoice():
-    # 600초가 지나면 프로그램이 종료되도록 함.
-    timer = threading.Timer(600, timeout)
-    timer.start()
+
     start_time = time.time()
+    end_time = start_time + time_limit
 
     # 초기해
     current = list(range(1, city_count))
 
-    # TODO : 종료 조건을 어떻게 설정해야 할까..
-    while True:
+    while time.time() < end_time:
         # 랜덤한 이웃해 생성
         exchange_idx1 = random.randint(0, city_count-2)
         exchange_idx2 = random.randint(0, city_count-2)
@@ -104,16 +95,14 @@ def FirstChoice():
 
 
 
-
     print("탐색 끝")
     print(f"탐색시간 : {(time.time() - start_time)}초")
-    timer.cancel()
+    label.configure(text=neighbor_dist)
 
 def SimulatedAnnealing():
-    # 600초가 지나면 프로그램이 종료되도록 함.
-    timer = threading.Timer(600, timeout)
-    timer.start()
+
     start_time = time.time()
+    end_time = start_time + time_limit
 
     temperature = 100
 
@@ -121,7 +110,7 @@ def SimulatedAnnealing():
     # 초기해
     current = list(range(1, city_count))
 
-    while temperature >= 0.00001:
+    while temperature >= 0.00001 and time.time() < end_time:
         # 랜덤한 이웃해 생성
         exchange_idx1 = random.randint(0, city_count - 2)
         exchange_idx2 = random.randint(0, city_count - 2)
@@ -146,24 +135,19 @@ def SimulatedAnnealing():
                 current = neighbor
                 print(neighbor_dist, neighbor)
                 DrawTour(current)
-
         # Scheduled(T) 작업 수행
         temperature *= 0.999
         temperature -= 0.01
 
     print("탐색 끝")
     print(f"탐색시간 : {(time.time() - start_time)}초")
-    timer.cancel()
-
+    label.configure(text=neighbor_dist)
 def GeneticAlgorithm():
-    # 600초가 지나면 프로그램이 종료되도록 함.
-    timer = threading.Timer(600, timeout)
-    timer.start()
-    start_time = time.time()
 
+    start_time = time.time()
+    end_time = start_time + time_limit
     print("탐색 끝")
     print(f"탐색시간 : {(time.time() - start_time)}초")
-    timer.cancel()
 
 
 
@@ -224,7 +208,7 @@ def RandomRestartFirstChoice():
     print("탐색 끝")
     print(f"{best_distance} {best_path}")
     print(f"탐색시간 : {(time.time() - start_time)}초")
-
+    label.configure(text=best_distance)
 
 # GUI : 경로에 따라 그림 그리기
 # tour : 시작 도시(0)를 제외한 경로 (예, [1, 2, 3, 4, 5])
